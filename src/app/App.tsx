@@ -10,11 +10,11 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-    <MainLayout>
-      <HistoricalDateSection />
-    </MainLayout>
+      <MainLayout>
+        <HistoricalDateSection />
+      </MainLayout>
     </ThemeProvider>
-  )
+  );
 }
 
 export default App;

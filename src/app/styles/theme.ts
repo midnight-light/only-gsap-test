@@ -6,6 +6,7 @@ export const theme: DefaultTheme = {
     secondary: '#6c757d',
     background: '#F4F5F9',
     foreground: '#42567A',
+    muted: '#d9dde4',
     text: '#42567A',
     error: '#dc3545',
     success: '#28a745',
@@ -25,7 +26,7 @@ export const theme: DefaultTheme = {
   },
   typography: {
     fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      '-apple-system, "PT Sans", BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: {
       sm: '12px',
       md: '16px',

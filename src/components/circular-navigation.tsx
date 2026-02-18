@@ -2,26 +2,25 @@ import { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { gsap, useGSAP } from '../app/gsap/gsap';
 import { theme } from '../app/styles/theme';
+import {
+  HistoricalDate,
+  TimeLinePoint,
+} from '../features/historical-date/constants/historical-dates-mok.constants';
 
 const initialState = {
   items: {
+    angleOffset: -Math.PI / 3, // -60 градусов для начальной позиции
     scale: 0.1,
+    activeScale: 1.5,
   },
 };
 
-const ACTIVE_SCALE = 1.5;
-
-interface Point {
-  id: number;
-  label: string;
-  description?: string;
-}
-
 interface CircularNavigationProps {
-  points: Point[];
+  points: HistoricalDate;
   radius?: number;
   pointSize?: number;
   targetAngle?: number;
+  selectedPointId?: number;
   initialDelay?: number;
 }
 
@@ -123,8 +122,9 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   points,
   radius = 300,
   pointSize = 56,
-  targetAngle = -55,
+  targetAngle = initialState.items.angleOffset,
   initialDelay = 1.5,
+  selectedPointId,
 }) => {
   const container = useRef<HTMLDivElement>(null);
   const gallery = useRef<HTMLDivElement>(null);
@@ -155,12 +155,13 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
       const centerY = containerEl.offsetHeight / 2;
 
       if (descriptionRef.current) {
-        const targetAngleRad = (targetAngle * Math.PI) / 180;
+        const targetAngleRad = initialState.items.angleOffset;
         const itemScreenX = centerX + radius * Math.cos(targetAngleRad);
         const itemScreenY = centerY + radius * Math.sin(targetAngleRad);
 
         gsap.set(descriptionRef.current, {
-          left: itemScreenX + (pointSize / 2) * ACTIVE_SCALE + 20,
+          left:
+            itemScreenX + (pointSize / 2) * initialState.items.activeScale + 20,
           top: itemScreenY,
           yPercent: -50,
         });
@@ -178,7 +179,7 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
 
       // анимация появления точек
       items.forEach((item, index) => {
-        const angle = index * angleIncrement;
+        const angle = index * angleIncrement + initialState.items.angleOffset;
         const initialRotation = angle * (180 / Math.PI) + 90;
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
@@ -224,7 +225,7 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
 
     const tl = gsap.timeline();
     tl.to(itemSelector, {
-      scale: 1.5,
+      scale: initialState.items.activeScale,
       duration: 0.4,
       ease: 'back.out(1.7)',
     });
@@ -286,7 +287,7 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     );
   });
 
-  const handlePointClick = contextSafe((point: Point, index: number) => {
+  const handlePointClick = contextSafe((point: TimeLinePoint) => {
     if (isAnimating || activePointId === point.id) return;
 
     const previousActiveId = activePointId;
@@ -295,9 +296,10 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     setIsAnimating(true);
 
     // вычисление угла точки
-    const numberOfItems = points.length;
+    const numberOfItems = points.meta.pointCount;
     const angleIncrement = (2 * Math.PI) / numberOfItems;
-    const pointAngle = index * angleIncrement;
+    const pointAngle =
+      point.id * angleIncrement + initialState.items.angleOffset;
     const pointAngleDegrees = pointAngle * (180 / Math.PI);
 
     // текущая позиция точки с учетом вращения контейнера
@@ -351,14 +353,14 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
           ease: 'power2.in',
           onComplete: () => {
             //обновляем текст когда description спрятан
-            setActiveDescription(point.description ?? '');
+            setActiveDescription(point.category ?? '');
             gsap.set(descriptionRef.current, { x: 5 });
           },
         },
         0,
       );
     } else {
-      setActiveDescription(point.description ?? '');
+      setActiveDescription(point.category ?? '');
     }
 
     // анимация вращения
@@ -372,8 +374,8 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
       0,
     );
 
-    points.forEach((p, idx) => {
-      const angle = idx * angleIncrement;
+    points.data.forEach((p, idx) => {
+      const angle = idx * angleIncrement + initialState.items.angleOffset;
       const initialRotation = angle * (180 / Math.PI) + 90;
       tl.to(
         `.item-${p.id} .label`,
@@ -388,7 +390,7 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     tl.to(
       `.item-${point.id}`,
       {
-        scale: 1.5,
+        scale: initialState.items.activeScale,
         duration: 0.5,
       },
       0,
@@ -422,17 +424,17 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
       <Gallery ref={gallery}>
         <CenterCircle className="center-circle" $radius={radius} />
 
-        {points.map((point, index) => (
+        {points.data.map((point) => (
           <Item
             key={point.id}
-            aria-label={`Point ${point.label}`}
+            aria-label={`Point ${point.category}`}
             className={`item item-${point.id}`}
             $size={pointSize}
-            onClick={() => handlePointClick(point, index)}
+            onClick={() => handlePointClick(point)}
             onMouseEnter={() => handleMouseEnter(point.id)}
             onMouseLeave={() => handleMouseLeave(point.id)}
           >
-            <ItemLabel className="label">{point.label}</ItemLabel>
+            <ItemLabel className="label">{point.id}</ItemLabel>
           </Item>
         ))}
       </Gallery>
@@ -443,7 +445,7 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
 
       {process.env.NODE_ENV === 'development' && (
         <DebugInfo>
-          <div>Points: {points.length}</div>
+          <div>Points: {points.meta.pointCount}</div>
           <div>Radius: {radius}px</div>
           <div>Current Rotation: {currentRotation.toFixed(1)}°</div>
           <div>Active Point: {activePointId ?? 'none'}</div>
@@ -453,15 +455,4 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
       )}
     </Container>
   );
-};
-
-export const generatePointsWithLabels = (
-  labels: string[],
-  descriptions: string[],
-): Point[] => {
-  return labels.map((label, i) => ({
-    id: i + 1,
-    label,
-    description: descriptions[i],
-  }));
 };

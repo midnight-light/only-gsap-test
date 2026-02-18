@@ -1,14 +1,11 @@
-import { Flex } from '../components/layout/flex';
-import { GridContainer } from '../components/layout/grid/grid-container';
-import { GridItem } from '../components/layout/grid/grid-item';
-import { Header } from '../components/typography/header';
-import { Separator } from '../components/ui/separator';
-import {
-  CircularNavigation,
-  generatePointsWithLabels,
-} from '../components/circular-navigation';
+import { Flex } from '../../components/layout/flex';
+import { GridContainer } from '../../components/layout/grid/grid-container';
+import { GridItem } from '../../components/layout/grid/grid-item';
+import { Header } from '../../components/typography/header';
+import { Separator } from '../../components/ui/separator';
+import { CircularNavigation } from '../../components/circular-navigation';
 import styled from 'styled-components';
-import { useMemo } from 'react';
+import { getHistoricalDates } from './constants/historical-dates-mok.constants';
 
 const Container = styled.div`
   position: relative;
@@ -16,25 +13,16 @@ const Container = styled.div`
 `;
 
 export const HistoricalDateSection = () => {
-  const labels = useMemo(() => ['1', '2', '3', '4', '5', '6'], []);
-  const descriptions = useMemo(
-    () => ['', 'Кино', 'Литература', '', '', 'Наука'],
-    [],
-  );
-  const pointsWithLabels = useMemo(
-    () => generatePointsWithLabels(labels, descriptions),
-    [],
-  );
+  const historicalDates = getHistoricalDates();
 
-  console.log(pointsWithLabels);
+  console.warn('historicalDates', historicalDates);
 
   return (
     <Container>
       <CircularNavigation
-        points={pointsWithLabels}
+        points={historicalDates}
         radius={265}
         pointSize={56}
-        targetAngle={-55}
         initialDelay={1}
       />
       <GridContainer

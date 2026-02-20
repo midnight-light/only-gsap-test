@@ -26,8 +26,10 @@ interface StyledGridItemProps {
   $borderLeft?: BorderConfig;
 
   $borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
-  alignItems?: 'start' | 'center' | 'end';
-  justifyContent?: 'start' | 'center' | 'end';
+  $alignItems?: 'start' | 'center' | 'end';
+  $justifyContent?: 'start' | 'center' | 'end';
+  $gridColumn?: string;
+  $gridRow?: string;
 }
 
 interface GridItemProps extends StyledGridItemProps {
@@ -97,8 +99,11 @@ const GridItemContainer = styled.div<StyledGridItemProps>`
   border-radius: ${({ $borderRadius = '0' }) => $borderRadius};
 
   display: flex;
-  align-items: ${({ alignItems = 'center' }) => alignItems};
-  justify-content: ${({ justifyContent = 'center' }) => justifyContent};
+  align-items: ${({ $alignItems: alignItems = 'center' }) => alignItems};
+  justify-content: ${({ $justifyContent: justifyContent = 'center' }) =>
+    justifyContent};
+  ${({ $gridColumn }) => $gridColumn && `grid-column: ${$gridColumn};`}
+  ${({ $gridRow }) => $gridRow && `grid-row: ${$gridRow};`}
 `;
 
 export const GridItem = ({ children, ...props }: GridItemProps) => {

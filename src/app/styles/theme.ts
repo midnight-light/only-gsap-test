@@ -16,7 +16,7 @@ export const theme: DefaultTheme = {
     xs: '0.43rem', // 7px
     sm: '1.25rem', // 20px
     md: '1.68rem', // 27px
-    lg: '2.13rem', // 34px
+    lg: '3.5rem', // 56px
     xl: '5rem', // 80px
   },
   breakpoints: {

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { gsap, useGSAP } from '../app/gsap/gsap';
 import { theme } from '../app/styles/theme';
@@ -6,6 +6,8 @@ import {
   HistoricalDate,
   TimeLinePoint,
 } from '../features/historical-date/constants/historical-dates-mok.constants';
+import { applyItemHoverStyle } from '../libs/gsap/animations/apply-hover-style-tiem';
+import { resetItemHoverStyle } from '../libs/gsap/animations/reset-hover-style-item';
 
 const initialState = {
   items: {
@@ -20,8 +22,9 @@ interface CircularNavigationProps {
   radius?: number;
   pointSize?: number;
   targetAngle?: number;
-  selectedPointId?: number;
+  activePointId: number;
   initialDelay?: number;
+  onActivePointChange: (point: TimeLinePoint) => void;
 }
 
 const Container = styled.div`
@@ -32,6 +35,7 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: auto;
 `;
 
 const Gallery = styled.div`
@@ -74,6 +78,8 @@ const Item = styled.div<{ $size: number }>`
   justify-content: center;
   transition: background-color 0.3s ease;
   will-change: transform;
+  z-index: 100;
+  pointer-events: auto !important;
 `;
 
 const ItemLabel = styled.span`
@@ -85,7 +91,6 @@ const ItemLabel = styled.span`
   font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
   color: ${({ theme }) => theme.colors.text};
   user-select: none;
-  pointer-events: none;
   opacity: 0;
 `;
 
@@ -124,7 +129,8 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   pointSize = 56,
   targetAngle = initialState.items.angleOffset,
   initialDelay = 1.5,
-  selectedPointId,
+  activePointId,
+  onActivePointChange,
 }) => {
   const container = useRef<HTMLDivElement>(null);
   const gallery = useRef<HTMLDivElement>(null);
@@ -133,7 +139,6 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   const descriptionRef = useRef<HTMLDivElement>(null);
   const [activeDescription, setActiveDescription] = useState<string>('');
 
-  const [activePointId, setActivePointId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentRotation, setCurrentRotation] = useState(0);
 
@@ -212,6 +217,8 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
           );
         }
       });
+
+      applyItemHoverStyle(tl, activePointId, initialState.items.activeScale);
     },
     { scope: container },
   );
@@ -219,80 +226,29 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   const { contextSafe } = useGSAP({ scope: container });
 
   const handleMouseEnter = contextSafe((pointId: number) => {
-    if (activePointId === pointId || isAnimating) return;
-    const itemSelector = `.item-${pointId}`;
-    const labelSelector = `.item-${pointId} .label`;
-
+    if (isAnimating) return;
     const tl = gsap.timeline();
-    tl.to(itemSelector, {
-      scale: initialState.items.activeScale,
-      duration: 0.4,
-      ease: 'back.out(1.7)',
-    });
 
-    tl.to(
-      labelSelector,
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 0.3,
-        ease: 'back.out(2)',
-      },
-      '<0.1',
-    );
-
-    tl.to(
-      itemSelector,
-      {
-        borderColor: theme.colors.foreground,
-        backgroundColor: theme.colors.background,
-        duration: 0.3,
-      },
-      '<',
-    );
+    applyItemHoverStyle(tl, pointId, initialState.items.activeScale);
   });
 
   const handleMouseLeave = contextSafe((pointId: number) => {
     if (activePointId === pointId || isAnimating) return;
 
-    const itemSelector = `.item-${pointId}`;
-    const labelSelector = `.item-${pointId} .label`;
-
     const tl = gsap.timeline();
 
-    tl.to(labelSelector, {
-      opacity: 0,
-      scale: 0,
-      duration: 0.2,
-      ease: 'power2.in',
-    });
-
-    tl.to(
-      itemSelector,
-      {
-        scale: initialState.items.scale,
-        duration: 0.3,
-        ease: 'power2.inOut',
-      },
-      '<0.05',
-    );
-    tl.to(
-      itemSelector,
-      {
-        borderColor: theme.colors.muted,
-        backgroundColor: theme.colors.foreground,
-        duration: 0.3,
-      },
-      '<',
-    );
+    resetItemHoverStyle(tl, pointId, initialState.items.scale);
   });
 
   const handlePointClick = contextSafe((point: TimeLinePoint) => {
     if (isAnimating || activePointId === point.id) return;
 
+    console.warn('point.id', point.id);
+    console.warn('activePointId', activePointId);
+
     const previousActiveId = activePointId;
 
-    setActivePointId(point.id);
+    onActivePointChange(point);
     setIsAnimating(true);
 
     // вычисление угла точки
@@ -322,6 +278,8 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     });
 
     if (previousActiveId && previousActiveId !== point.id) {
+      console.warn('previousActiveId', previousActiveId);
+      console.warn('point.id', point.id);
       tl.to(
         `.item-${previousActiveId}`,
         {
@@ -419,6 +377,18 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     );
   });
 
+  useEffect(() => {
+    console.warn('activePointId', activePointId);
+    if (activePointId) {
+      console.warn('points.data', points.data);
+      const activePoint = points.data.find((p) => p.id === activePointId);
+      console.warn('activePoint', activePoint);
+      if (activePoint) {
+        handlePointClick(activePoint);
+      }
+    }
+  }, [activePointId]);
+
   return (
     <Container ref={container}>
       <Gallery ref={gallery}>
@@ -442,17 +412,6 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
       <ItemDescription ref={descriptionRef} className="active-description">
         {activeDescription}
       </ItemDescription>
-
-      {process.env.NODE_ENV === 'development' && (
-        <DebugInfo>
-          <div>Points: {points.meta.pointCount}</div>
-          <div>Radius: {radius}px</div>
-          <div>Current Rotation: {currentRotation.toFixed(1)}°</div>
-          <div>Active Point: {activePointId ?? 'none'}</div>
-          <div>Target Angle: {targetAngle}°</div>
-          <div>Is Animating: {isAnimating ? 'yes' : 'no'}</div>
-        </DebugInfo>
-      )}
     </Container>
   );
 };

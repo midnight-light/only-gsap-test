@@ -318,14 +318,16 @@ export const HISTORICAL_DATES_MOCK = [
   },
 ];
 
+export interface TimeLineEvent {
+  id: number;
+  year: number;
+  description: string;
+}
+
 export interface TimeLinePoint {
   id: number;
   category: string;
-  events: {
-    id: number;
-    year: number;
-    description: string;
-  }[];
+  events: TimeLineEvent[];
 }
 
 export interface HistoricalDate {

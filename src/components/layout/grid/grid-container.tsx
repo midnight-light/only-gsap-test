@@ -44,6 +44,16 @@ interface GridContainerProps extends StyledGridContainerProps {
   className?: string;
 }
 
+export const OverlayItem = styled.div`
+  grid-column: 1 / -1;
+  grid-row: 1 / 3;
+  position: relative;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-row: 2 / 4;
+  }
+`;
+
 const StyledGridContainer = styled.div<StyledGridContainerProps>`
   display: grid;
 

@@ -70,6 +70,7 @@ const PointControlsButtons = styled.div`
 `;
 
 interface EventsSwiperProps {
+  onPointChange: (newPointActiveIndex: number) => void;
   events: TimeLineEvent[];
   currentPointId: number;
   totalPoints: number;
@@ -94,6 +95,7 @@ const NavButtonNext = styled(Button)<{ $active: boolean }>`
 `;
 
 export const EventsSwiper: React.FC<EventsSwiperProps> = ({
+  onPointChange,
   events,
   currentPointId,
   totalPoints,
@@ -123,10 +125,18 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
           {pad(currentPointId)}/{pad(totalPoints)}
         </span>
         <PointControlsButtons>
-          <Button variant="outline">
+          <Button
+            disabled={currentPointId < 1}
+            variant="outline"
+            onClick={() => onPointChange(currentPointId - 1)}
+          >
             <ChevronIcon direction="left" />
           </Button>
-          <Button variant="outline">
+          <Button
+            disabled={currentPointId >= totalPoints}
+            variant="outline"
+            onClick={() => onPointChange(currentPointId + 1)}
+          >
             <ChevronIcon direction="right" />
           </Button>
         </PointControlsButtons>

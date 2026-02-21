@@ -139,23 +139,23 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   const descriptionRef = useRef<HTMLDivElement>(null);
   const [activeDescription, setActiveDescription] = useState<string>('');
 
+  const prevActivePointIdRef = useRef<number>(activePointId);
+
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentRotation, setCurrentRotation] = useState(0);
 
-  useGSAP(
+  const { contextSafe } = useGSAP(
     () => {
       const items = container.current?.querySelectorAll('.item');
       const centerCircle = container.current?.querySelector('.center-circle');
       const containerEl = container.current;
 
       if (!items || !containerEl || !centerCircle || !gallery.current) {
-        console.warn('CircularNavigation: Required elements not found');
         return;
       }
 
       const numberOfItems = items.length;
       const angleIncrement = (2 * Math.PI) / numberOfItems;
-
       const centerX = containerEl.offsetWidth / 2;
       const centerY = containerEl.offsetHeight / 2;
 
@@ -182,14 +182,12 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
         ease: 'back.out(1.7)',
       });
 
-      // анимация появления точек
       items.forEach((item, index) => {
         const angle = index * angleIncrement + initialState.items.angleOffset;
         const initialRotation = angle * (180 / Math.PI) + 90;
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
 
-        // сохранение начального угла для последующих расчетов
         item.setAttribute('data-angle', angle.toString());
         item.setAttribute('data-index', index.toString());
 
@@ -205,16 +203,10 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
           },
           index * 0.1,
         );
+
         const labelEl = item.querySelector<HTMLElement>('.label');
         if (labelEl) {
-          tl.set(
-            labelEl,
-            {
-              rotation: -initialRotation,
-            },
-
-            index * 0.1,
-          );
+          tl.set(labelEl, { rotation: -initialRotation }, index * 0.1);
         }
       });
 
@@ -223,7 +215,120 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     { scope: container },
   );
 
-  const { contextSafe } = useGSAP({ scope: container });
+  const rotateToPoint = contextSafe(
+    (point: TimeLinePoint, previousActiveId: number) => {
+      setIsAnimating(true);
+
+      const numberOfItems = points.meta.pointCount;
+      const angleIncrement = (2 * Math.PI) / numberOfItems;
+      const pointAngle =
+        point.id * angleIncrement + initialState.items.angleOffset;
+      const pointAngleDegrees = pointAngle * (180 / Math.PI);
+
+      const currentPointPosition = (pointAngleDegrees + currentRotation) % 360;
+      let delta = targetAngle - currentPointPosition;
+
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+
+      const newRotation = currentRotation + delta;
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setCurrentRotation(newRotation);
+          setIsAnimating(false);
+        },
+      });
+
+      if (previousActiveId !== point.id) {
+        console.warn('previousActiveId', previousActiveId);
+        tl.to(
+          `.item-${previousActiveId}`,
+          {
+            scale: initialState.items.scale,
+            backgroundColor: theme.colors.foreground,
+            duration: 0.3,
+            ease: 'power2.in',
+          },
+          0,
+        );
+
+        tl.to(
+          `.item-${previousActiveId} .label`,
+          {
+            opacity: 0,
+            scale: 0,
+            duration: 0.2,
+            ease: 'power2.in',
+          },
+          0,
+        );
+
+        tl.to(
+          descriptionRef.current,
+          {
+            opacity: 0,
+            x: -5,
+            duration: 0.2,
+            ease: 'power2.in',
+            onComplete: () => {
+              setActiveDescription(point.category ?? '');
+              gsap.set(descriptionRef.current, { x: 5 });
+            },
+          },
+          0,
+        );
+      } else {
+        setActiveDescription(point.category ?? '');
+      }
+
+      tl.to(
+        gallery.current,
+        {
+          rotation: newRotation,
+          duration: 1.2,
+          ease: 'power2.inOut',
+        },
+        0,
+      );
+
+      points.data.forEach((p, idx) => {
+        const angle = idx * angleIncrement + initialState.items.angleOffset;
+        const initialRotation = angle * (180 / Math.PI) + 90;
+        tl.to(
+          `.item-${p.id} .label`,
+          {
+            rotation: -(newRotation + initialRotation),
+            ease: 'power2.inOut',
+          },
+          0,
+        );
+      });
+      applyItemHoverStyle(tl, point.id, initialState.items.activeScale);
+
+      tl.to(
+        `.item-${point.id} .label`,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: 'back.out(2)',
+        },
+        0.6,
+      );
+
+      tl.to(
+        descriptionRef.current,
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+        },
+        1.0,
+      );
+    },
+  );
 
   const handleMouseEnter = contextSafe((pointId: number) => {
     if (isAnimating) return;
@@ -243,149 +348,21 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   const handlePointClick = contextSafe((point: TimeLinePoint) => {
     if (isAnimating || activePointId === point.id) return;
 
-    console.warn('point.id', point.id);
-    console.warn('activePointId', activePointId);
-
     const previousActiveId = activePointId;
-
     onActivePointChange(point);
-    setIsAnimating(true);
-
-    // вычисление угла точки
-    const numberOfItems = points.meta.pointCount;
-    const angleIncrement = (2 * Math.PI) / numberOfItems;
-    const pointAngle =
-      point.id * angleIncrement + initialState.items.angleOffset;
-    const pointAngleDegrees = pointAngle * (180 / Math.PI);
-
-    // текущая позиция точки с учетом вращения контейнера
-    const currentPointPosition = (pointAngleDegrees + currentRotation) % 360;
-
-    // разница до целевого угла
-    let delta = targetAngle - currentPointPosition;
-
-    // выбор кратчайшего пути
-    if (delta > 180) delta -= 360;
-    if (delta < -180) delta += 360;
-
-    const newRotation = currentRotation + delta;
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setCurrentRotation(newRotation);
-        setIsAnimating(false);
-      },
-    });
-
-    if (previousActiveId && previousActiveId !== point.id) {
-      console.warn('previousActiveId', previousActiveId);
-      console.warn('point.id', point.id);
-      tl.to(
-        `.item-${previousActiveId}`,
-        {
-          scale: initialState.items.scale,
-          backgroundColor: theme.colors.foreground,
-          duration: 0.3,
-          ease: 'power2.in',
-        },
-        0,
-      );
-
-      tl.to(
-        `.item-${previousActiveId} .label`,
-        {
-          opacity: 0,
-          scale: 0,
-          duration: 0.2,
-          ease: 'power2.in',
-        },
-        0,
-      );
-
-      tl.to(
-        descriptionRef.current,
-        {
-          opacity: 0,
-          x: -5,
-          duration: 0.2,
-          ease: 'power2.in',
-          onComplete: () => {
-            //обновляем текст когда description спрятан
-            setActiveDescription(point.category ?? '');
-            gsap.set(descriptionRef.current, { x: 5 });
-          },
-        },
-        0,
-      );
-    } else {
-      setActiveDescription(point.category ?? '');
-    }
-
-    // анимация вращения
-    tl.to(
-      gallery.current,
-      {
-        rotation: newRotation,
-        duration: 1.2,
-        ease: 'power2.inOut',
-      },
-      0,
-    );
-
-    points.data.forEach((p, idx) => {
-      const angle = idx * angleIncrement + initialState.items.angleOffset;
-      const initialRotation = angle * (180 / Math.PI) + 90;
-      tl.to(
-        `.item-${p.id} .label`,
-        {
-          rotation: -(newRotation + initialRotation),
-          ease: 'power2.inOut',
-        },
-        0,
-      );
-    });
-
-    tl.to(
-      `.item-${point.id}`,
-      {
-        scale: initialState.items.activeScale,
-        duration: 0.5,
-      },
-      0,
-    );
-
-    tl.to(
-      `.item-${point.id} .label`,
-
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 0.4,
-        ease: 'back.out(2)',
-      },
-      0.6,
-    );
-    tl.to(
-      descriptionRef.current,
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.4,
-        ease: 'power2.out',
-      },
-      1.0,
-    );
+    rotateToPoint(point, previousActiveId);
   });
 
   useEffect(() => {
     console.warn('activePointId', activePointId);
-    if (activePointId) {
-      console.warn('points.data', points.data);
-      const activePoint = points.data.find((p) => p.id === activePointId);
-      console.warn('activePoint', activePoint);
-      if (activePoint) {
-        handlePointClick(activePoint);
-      }
+    const previousId = prevActivePointIdRef.current;
+    prevActivePointIdRef.current = activePointId;
+
+    if (previousId === activePointId) return;
+
+    const activePoint = points.data.find((p) => p.id === activePointId);
+    if (activePoint) {
+      rotateToPoint(activePoint, previousId);
     }
   }, [activePointId]);
 

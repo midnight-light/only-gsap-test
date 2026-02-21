@@ -34,6 +34,18 @@ export const HistoricalDateSection = () => {
     setActivePoint(point);
   };
 
+  const handlePointChange = (newPointActiveIndex: number) => {
+    console.warn('newPointActiveIndex', newPointActiveIndex);
+
+    const newPoint = historicalDates.data.find(
+      (p) => p.id === newPointActiveIndex,
+    ) as TimeLinePoint;
+
+    if (!newPoint) return;
+
+    setActivePoint(newPoint);
+  };
+
   console.warn('historicalDates', historicalDates);
 
   return (
@@ -139,6 +151,7 @@ export const HistoricalDateSection = () => {
           />
 
           <EventsSwiper
+            onPointChange={handlePointChange}
             events={activePoint.events}
             currentPointId={activePoint.id}
             totalPoints={historicalDates.meta.pointCount}

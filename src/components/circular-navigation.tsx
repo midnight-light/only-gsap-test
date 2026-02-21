@@ -49,8 +49,9 @@ const CenterCircle = styled.div<{ $radius: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
-  width: ${({ $radius }) => $radius / 8}rem;
-  height: ${({ $radius }) => $radius / 8}rem;
+  width: ${({ $radius }) => $radius * 2}px;
+  height: ${({ $radius }) => $radius * 2}px;
+
   border: 1px solid ${({ theme }) => theme.colors.muted};
 
   transform: translate(-50%, -50%);

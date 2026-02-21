@@ -36,13 +36,13 @@ export const theme: DefaultTheme = {
       xl: '24px',
     },
     heading: {
-      landingTitle: '200px',
-      h1: '58px',
-      h2: '42px',
-      h3: '28px',
-      h4: '24px',
-      h5: '20px',
-      h6: '16px',
+      landingTitle: '12.5rem', // 200px
+      h1: '3.5rem', // 56px
+      h2: '2.625rem', // 42px
+      h3: '1.75rem', // 28px
+      h4: '1.5rem', // 24px
+      h5: '1.25rem', // 20px
+      h6: '1rem', // 16px
     },
     fontWeight: {
       light: 300,

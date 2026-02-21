@@ -14,6 +14,10 @@ const Wrapper = styled.div`
   font-size: ${({ theme }) => theme.typography.heading.landingTitle};
   font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
   color: ${({ theme }) => theme.colors.text};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    font-size: ${({ theme }) => theme.typography.heading.h1};
+  }
 `;
 
 export const YearRange: React.FC<YearRangeProps> = ({ point }) => {

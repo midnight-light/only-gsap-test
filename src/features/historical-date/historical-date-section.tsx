@@ -17,11 +17,14 @@ import { EventsSwiper } from './components/swiper/events-swiper';
 import { YearRange } from './components/year-range';
 
 const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
   max-height: 67.5rem;
   max-width: 90rem;
-  background: ${({ theme }) => theme.colors.background};
+  background: ${({ theme }) => theme.colors.primary};
   position: relative;
 `;
 
@@ -44,8 +47,6 @@ export const HistoricalDateSection = () => {
   };
 
   const handlePointChange = (newPointActiveIndex: number) => {
-    console.warn('newPointActiveIndex', newPointActiveIndex);
-
     const newPoint = historicalDates.data.find(
       (p) => p.id === newPointActiveIndex,
     ) as TimeLinePoint;
@@ -55,8 +56,6 @@ export const HistoricalDateSection = () => {
     setActivePoint(newPoint);
   };
 
-  console.warn('historicalDates', historicalDates);
-
   return (
     <Container>
       <GridContainer
@@ -65,6 +64,11 @@ export const HistoricalDateSection = () => {
         $columnSize="44.87rem"
         $rowSize="30rem"
         $gap="none"
+        $laptop={{
+          columns: 2,
+          columnSize: '1fr',
+          rowSize: '30rem',
+        }}
         $tablet={{
           columns: 2,
           columnSize: '1fr',
@@ -76,7 +80,7 @@ export const HistoricalDateSection = () => {
           rowSize: '18.75rem',
         }}
         $justifyContent="center"
-        $alignContent="center"
+        $alignContent="stretch"
       >
         <GridItem
           $gridColumn="1"

@@ -2,11 +2,8 @@ import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
   html {
-    font-size: 16px;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.laptop}) {
-      font-size: 14px;
-    }
+    font-size: clamp(14px, 0.833vw, 16px);
+    height: 100%;
   }
 
   * {
@@ -21,6 +18,7 @@ export const GlobalStyles = createGlobalStyle`
     color: ${({ theme }) => theme.colors.text};
     background-color: ${({ theme }) => theme.colors.background};
     line-height: 1.5;
+    height: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

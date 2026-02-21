@@ -126,7 +126,7 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
         </span>
         <PointControlsButtons>
           <Button
-            disabled={currentPointId < 1}
+            disabled={currentPointId < 0}
             variant="outline"
             onClick={() => onPointChange(currentPointId - 1)}
           >

@@ -106,23 +106,6 @@ const ItemDescription = styled.div`
   white-space: pre-wrap;
 `;
 
-const DebugInfo = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  border-radius: 8px;
-  font-family: monospace;
-  font-size: 12px;
-  z-index: 100;
-
-  div {
-    margin: 4px 0;
-  }
-`;
-
 export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   points,
   radius = 300,
@@ -140,6 +123,18 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   const [activeDescription, setActiveDescription] = useState<string>('');
 
   const prevActivePointIdRef = useRef<number>(activePointId);
+
+  // синхронный флаг для guard-проверок внутри коллбэков GSAP и useEffect
+  const isAnimatingRef = useRef(false);
+
+  // визуальный ID точки, к которой летит текущая анимация
+  const animatingToPointIdRef = useRef<number>(activePointId);
+
+  // последний пропущенный запрос
+  const pendingPointRef = useRef<{
+    point: TimeLinePoint;
+    previousId: number;
+  } | null>(null);
 
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentRotation, setCurrentRotation] = useState(0);
@@ -217,7 +212,21 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
 
   const rotateToPoint = contextSafe(
     (point: TimeLinePoint, previousActiveId: number) => {
+      if (isAnimatingRef.current) {
+        // не ставим в очередь если уже летим к этой же точке
+        // (защита от двойного срабатывания: handlePointClick + useEffect)
+        if (point.id !== animatingToPointIdRef.current) {
+          pendingPointRef.current = {
+            point,
+            previousId: animatingToPointIdRef.current,
+          };
+        }
+        return;
+      }
+
+      isAnimatingRef.current = true;
       setIsAnimating(true);
+      animatingToPointIdRef.current = point.id;
 
       const numberOfItems = points.meta.pointCount;
       const angleIncrement = (2 * Math.PI) / numberOfItems;
@@ -236,7 +245,14 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
       const tl = gsap.timeline({
         onComplete: () => {
           setCurrentRotation(newRotation);
+          isAnimatingRef.current = false;
           setIsAnimating(false);
+
+          if (pendingPointRef.current) {
+            const pending = pendingPointRef.current;
+            pendingPointRef.current = null;
+            rotateToPoint(pending.point, pending.previousId);
+          }
         },
       });
 
@@ -359,11 +375,21 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
     prevActivePointIdRef.current = activePointId;
 
     if (previousId === activePointId) return;
-
     const activePoint = points.data.find((p) => p.id === activePointId);
-    if (activePoint) {
-      rotateToPoint(activePoint, previousId);
+    if (!activePoint) return;
+
+    if (isAnimatingRef.current) {
+      // анимация уже идёт - сохраняем как pending
+      if (activePoint.id !== animatingToPointIdRef.current) {
+        pendingPointRef.current = {
+          point: activePoint,
+          previousId: animatingToPointIdRef.current,
+        };
+      }
+      return;
     }
+
+    rotateToPoint(activePoint, previousId);
   }, [activePointId]);
 
   return (

@@ -1,6 +1,14 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
+  html {
+    font-size: 16px;
+
+    @media (max-width: ${({ theme }) => theme.breakpoints.laptop}) {
+      font-size: 14px;
+    }
+  }
+
   * {
     margin: 0;
     padding: 0;

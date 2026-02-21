@@ -3,6 +3,7 @@ import { DefaultTheme } from 'styled-components';
 export const theme: DefaultTheme = {
   colors: {
     primary: '#3877EE',
+    accent: '#EF5DA8',
     secondary: '#6c757d',
     background: '#F4F5F9',
     foreground: '#42567A',
@@ -34,6 +35,7 @@ export const theme: DefaultTheme = {
       xl: '24px',
     },
     heading: {
+      landingTitle: '200px',
       h1: '58px',
       h2: '42px',
       h3: '28px',

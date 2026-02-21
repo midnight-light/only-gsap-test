@@ -5,6 +5,7 @@ declare module 'styled-components' {
     colors: {
       primary: string;
       secondary: string;
+      accent: string;
       background: string;
       foreground: string;
       muted: string;
@@ -34,6 +35,7 @@ declare module 'styled-components' {
         xl: string;
       };
       heading: {
+        landingTitle: string;
         h1: string;
         h2: string;
         h3: string;

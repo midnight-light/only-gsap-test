@@ -14,6 +14,7 @@ import {
 } from './constants/historical-dates-mok.constants';
 import { useState } from 'react';
 import { EventsSwiper } from './components/swiper/events-swiper';
+import { YearRange } from './components/year-range';
 
 const Container = styled.div`
   width: 100%;
@@ -22,6 +23,14 @@ const Container = styled.div`
   max-width: 90rem;
   background: ${({ theme }) => theme.colors.background};
   position: relative;
+`;
+
+const YearRangeContainer = styled.div`
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  pointer-events: none;
 `;
 
 export const HistoricalDateSection = () => {
@@ -149,6 +158,10 @@ export const HistoricalDateSection = () => {
             initialDelay={1}
             onActivePointChange={handleActivePointChange}
           />
+
+          <YearRangeContainer>
+            <YearRange point={activePoint} />
+          </YearRangeContainer>
 
           <EventsSwiper
             onPointChange={handlePointChange}

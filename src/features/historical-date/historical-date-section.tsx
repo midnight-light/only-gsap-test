@@ -24,7 +24,7 @@ const Container = styled.div`
   height: 100%;
   max-height: 67.5rem;
   max-width: 90rem;
-  background: ${({ theme }) => theme.colors.primary};
+  background: ${({ theme }) => theme.colors.background};
   position: relative;
 `;
 

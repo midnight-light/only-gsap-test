@@ -19,7 +19,7 @@ type AlignContent =
   | 'space-between'
   | 'space-around';
 
-interface StyledFlexProps {
+interface StyledFlexProps extends React.HTMLAttributes<HTMLDivElement> {
   $direction?: FlexDirection;
   $wrap?: FlexWrap;
   $justify?: JustifyContent;

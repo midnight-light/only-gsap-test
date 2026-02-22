@@ -13,6 +13,7 @@ import { YearRange } from './components/year-range';
 import { QuadrantContainer } from '../../components/layout/quadrant-container';
 import useMediaQuery from '../../hooks/use-media-query';
 import { theme } from '../../app/styles/theme';
+import { RevealContainer } from '../../components/animations/reveal-container';
 
 const Container = styled.div`
   display: flex;
@@ -92,7 +93,7 @@ export const HistoricalDateSection = () => {
         $align="center"
         $alignContent="center"
         $width="100%"
-        $gap="xl"
+        $gap="md"
         $height="100%"
         $fluid
       >
@@ -104,12 +105,27 @@ export const HistoricalDateSection = () => {
 
         <YearRange point={activePoint} />
 
-        <Separator
-          $width="100%"
-          $color="muted"
-          $orientation="horizontal"
-          $thickness="1px"
-        />
+        <RevealContainer key={activePoint.id}>
+          <Flex
+            $direction="column"
+            $gap="md"
+            $align="flex-start"
+            $alignContent="flex-end"
+            $width="100%"
+            $fluid
+          >
+            <Header as="h4" $variant="primary" $align="left">
+              {activePoint.category}
+            </Header>
+
+            <Separator
+              $width="100%"
+              $color="muted"
+              $orientation="horizontal"
+              $thickness="1px"
+            />
+          </Flex>
+        </RevealContainer>
 
         <EventsSwiper
           onPointChange={handlePointChange}

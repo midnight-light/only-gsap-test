@@ -8,6 +8,7 @@ import { TimeLineEvent } from '../../constants/historical-dates-mok.constants';
 import { Button } from '../../../../components/ui/button';
 import { ChevronIcon } from '../../../../components/icons/chevron-icon';
 import { BulletPagination } from '../../../../components/bullet-pagination';
+import { RevealContainer } from '../../../../components/animations/reveal-container';
 
 const SwiperContainer = styled.div`
   position: absolute;
@@ -23,7 +24,7 @@ const SwiperContainer = styled.div`
   @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
     position: relative;
     flex-direction: column-reverse;
-    gap: ${({ theme }) => theme.spacing.md};
+    gap: ${({ theme }) => theme.spacing.xs};
   }
 `;
 
@@ -31,6 +32,11 @@ const SlidesArea = styled.div`
   position: relative;
   padding-left: ${({ theme }) => theme.spacing.xl};
   min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: ${({ theme }) => theme.spacing.xl};
 
   pointer-events: auto;
   .swiper {
@@ -39,7 +45,7 @@ const SlidesArea = styled.div`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
-    padding-left: ${({ theme }) => theme.spacing.sm};
+    padding: 0;
   }
 `;
 
@@ -48,9 +54,10 @@ const SlideContent = styled.div`
   gap: 1rem;
   display: flex;
   flex-direction: column;
+  height: 100%;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
-    width: 12rem;
+    width: 13rem;
   }
 `;
 
@@ -77,7 +84,7 @@ const PointControlsContainer = styled.div`
   padding-left: ${({ theme }) => theme.spacing.xl};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
-    padding-left: ${({ theme }) => theme.spacing.sm};
+    padding-left: 0;
   }
 `;
 
@@ -86,13 +93,17 @@ const PointControlsButtons = styled.div`
   display: flex;
   gap: 1.2rem;
   margin-bottom: ${({ theme }) => theme.spacing.lg};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    margin-bottom: ${({ theme }) => theme.spacing.xs};
+  }
 `;
 
 const NavButtonPrev = styled(Button)<{ $active: boolean }>`
   position: absolute;
   left: ${({ theme }) => theme.spacing.sm};
-  top: 50%;
-  transform: translateY(-50%);
+  top: 20%;
+  transform: translateY(-20%);
   opacity: ${({ $active }) => ($active ? 1 : 0)};
   z-index: 2;
 
@@ -104,8 +115,8 @@ const NavButtonPrev = styled(Button)<{ $active: boolean }>`
 const NavButtonNext = styled(Button)<{ $active: boolean }>`
   position: absolute;
   right: ${({ theme }) => theme.spacing.sm};
-  top: 50%;
-  transform: translateY(-50%);
+  top: 20%;
+  transform: translateY(-20%);
   opacity: ${({ $active }) => ($active ? 1 : 0)};
   pointer-events: auto;
   z-index: 2;
@@ -177,7 +188,7 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
         </PointControlsButtons>
       </PointControlsContainer>
 
-      <SlidesArea>
+      <SlidesArea key={currentPointId}>
         <NavButtonPrev
           size="md"
           $active={activeIndex > 0}
@@ -186,26 +197,28 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
         >
           <ChevronIcon direction="left" />
         </NavButtonPrev>
-        <Swiper
-          key={currentPointId}
-          className="events-swiper"
-          modules={[A11y, Keyboard]}
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-          }}
-          onSlideChange={(swiper) => handleSlideChange(swiper)}
-          slidesPerView={isMobile ? 1.5 : 3}
-          spaceBetween={isMobile ? 32 : 80}
-        >
-          {events.map((event) => (
-            <SwiperSlide key={event.id}>
-              <SlideContent>
-                <EventYear>{event.year}</EventYear>
-                <EventDescription>{event.description}</EventDescription>
-              </SlideContent>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <RevealContainer key={currentPointId}>
+          <Swiper
+            className="events-swiper"
+            modules={[A11y, Keyboard]}
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            onSlideChange={(swiper) => handleSlideChange(swiper)}
+            slidesPerView={isMobile ? 1.5 : 3}
+            spaceBetween={isMobile ? 32 : 80}
+          >
+            {events.map((event) => (
+              <SwiperSlide key={event.id}>
+                <SlideContent>
+                  <EventYear>{event.year}</EventYear>
+                  <EventDescription>{event.description}</EventDescription>
+                </SlideContent>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </RevealContainer>
+
         <NavButtonNext
           size="md"
           $active={activeIndex < events.length - 2}

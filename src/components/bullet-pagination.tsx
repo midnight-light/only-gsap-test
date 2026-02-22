@@ -48,8 +48,8 @@ const BulletDot = styled.span`
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: ${({ theme }) => theme.colors.muted};
-  opacity: 0.4;
+  background: ${({ theme }) => theme.colors.text};
+  opacity: 0.5;
   will-change: transform, opacity, background-color;
 `;
 

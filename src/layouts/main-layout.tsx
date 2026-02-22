@@ -15,6 +15,12 @@ const LayoutContainer = styled.div`
     padding-left: 0;
     padding-right: 0;
   }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    padding-top: ${({ theme }) => theme.spacing.sm};
+    padding-left: ${({ theme }) => theme.spacing.sm};
+    padding-right: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {

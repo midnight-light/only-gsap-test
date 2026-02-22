@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { A11y, Keyboard } from 'swiper/modules';
+import { A11y, Keyboard, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import styled from 'styled-components';
 import { TimeLineEvent } from '../../constants/historical-dates-mok.constants';
 import { Button } from '../../../../components/ui/button';
 import { ChevronIcon } from '../../../../components/icons/chevron-icon';
+import { BulletPagination } from '../../../../components/bullet-pagination';
 
 const SwiperContainer = styled.div`
   position: absolute;
@@ -18,7 +19,11 @@ const SwiperContainer = styled.div`
   display: flex;
   flex-direction: column;
   pointer-events: none;
-  /* padding-left: ${({ theme }) => theme.spacing.xl}; */
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    flex-direction: column-reverse;
+    gap: ${({ theme }) => theme.spacing.md};
+  }
 `;
 
 const SlidesArea = styled.div`
@@ -30,6 +35,10 @@ const SlidesArea = styled.div`
   .swiper {
     width: 100%;
     height: 100%;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    padding-left: ${({ theme }) => theme.spacing.sm};
   }
 `;
 
@@ -61,20 +70,18 @@ const PointControlsContainer = styled.div`
   pointer-events: none;
   font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
   padding-left: ${({ theme }) => theme.spacing.xl};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    padding-left: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 const PointControlsButtons = styled.div`
+  width: 100%;
   display: flex;
   gap: 1.2rem;
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
-
-interface EventsSwiperProps {
-  onPointChange: (newPointActiveIndex: number) => void;
-  events: TimeLineEvent[];
-  currentPointId: number;
-  totalPoints: number;
-}
 
 const NavButtonPrev = styled(Button)<{ $active: boolean }>`
   position: absolute;
@@ -94,23 +101,30 @@ const NavButtonNext = styled(Button)<{ $active: boolean }>`
   z-index: 2;
 `;
 
+interface EventsSwiperProps {
+  onPointChange: (newPointActiveIndex: number) => void;
+  events: TimeLineEvent[];
+  currentPointId: number;
+  totalPoints: number;
+  isMobile?: boolean;
+}
+
 export const EventsSwiper: React.FC<EventsSwiperProps> = ({
   onPointChange,
   events,
   currentPointId,
   totalPoints,
+  isMobile = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
   const pad = (n: number) => String(n).padStart(2, '0');
 
   const handleSlideChange = (swiper: SwiperType) => {
-    console.warn('swiper.activeIndex', swiper.activeIndex);
     setActiveIndex(swiper.activeIndex);
   };
 
   const toggleSlide = (newActiveIndex: number) => {
-    console.warn('toggleSlide', newActiveIndex);
     if (newActiveIndex < 0 || newActiveIndex >= events.length) return;
 
     const isPrev = newActiveIndex < activeIndex;
@@ -139,6 +153,13 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
           >
             <ChevronIcon direction="right" />
           </Button>
+          {isMobile && (
+            <BulletPagination
+              totalPoints={totalPoints}
+              currentPointId={currentPointId - 1} // -1, потому что точки генерируются процедурно
+              onBulletClick={(index: number) => onPointChange(index)}
+            />
+          )}
         </PointControlsButtons>
       </PointControlsContainer>
 
@@ -180,6 +201,5 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
         </NavButtonNext>
       </SlidesArea>
     </SwiperContainer>
-    // </SwiperControls>
   );
 };

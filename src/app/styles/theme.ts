@@ -22,6 +22,7 @@ export const theme: DefaultTheme = {
   },
   breakpoints: {
     mobile: '768px',
+    smallTablet: '820px',
     tablet: '1024px',
     laptop: '1280px',
     desktop: '1920px',

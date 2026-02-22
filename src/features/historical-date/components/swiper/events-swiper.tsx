@@ -21,6 +21,7 @@ const SwiperContainer = styled.div`
   pointer-events: none;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    position: relative;
     flex-direction: column-reverse;
     gap: ${({ theme }) => theme.spacing.md};
   }
@@ -47,6 +48,10 @@ const SlideContent = styled.div`
   gap: 1rem;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    width: 12rem;
+  }
 `;
 
 const EventYear = styled.span`
@@ -89,6 +94,11 @@ const NavButtonPrev = styled(Button)<{ $active: boolean }>`
   top: 50%;
   transform: translateY(-50%);
   opacity: ${({ $active }) => ($active ? 1 : 0)};
+  z-index: 2;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    display: none;
+  }
 `;
 
 const NavButtonNext = styled(Button)<{ $active: boolean }>`
@@ -99,6 +109,10 @@ const NavButtonNext = styled(Button)<{ $active: boolean }>`
   opacity: ${({ $active }) => ($active ? 1 : 0)};
   pointer-events: auto;
   z-index: 2;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    display: none;
+  }
 `;
 
 interface EventsSwiperProps {
@@ -180,7 +194,8 @@ export const EventsSwiper: React.FC<EventsSwiperProps> = ({
             swiperRef.current = swiper;
           }}
           onSlideChange={(swiper) => handleSlideChange(swiper)}
-          slidesPerView={3}
+          slidesPerView={isMobile ? 1.5 : 3}
+          spaceBetween={isMobile ? 32 : 80}
         >
           {events.map((event) => (
             <SwiperSlide key={event.id}>

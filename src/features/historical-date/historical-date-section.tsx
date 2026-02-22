@@ -22,6 +22,13 @@ const Container = styled.div`
   height: 100svh;
   max-width: 90rem;
   position: relative;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 100%;
+  }
 `;
 
 const YearRangeContainer = styled.div`
@@ -30,14 +37,6 @@ const YearRangeContainer = styled.div`
   transform: translate(-50%, -50%);
   left: 50%;
   pointer-events: none;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    justify-content: center;
-    align-items: center;
-  }
 `;
 
 const TopLeftContent = styled.div`
@@ -80,20 +79,19 @@ export const HistoricalDateSection = () => {
     return (
       <Flex
         $direction="column"
-        $justify="flex-start"
-        $alignContent="flex-start"
+        $justify="center"
+        $align="center"
+        $alignContent="center"
+        $width="100%"
         $gap="xl"
-        $columnGap="xl"
+        $height="100%"
+        $fluid
       >
         <Header as="h1" $variant="primary">
           Исторические даты
         </Header>
 
-        <YearRangeContainer>
-          <YearRange point={activePoint} />
-        </YearRangeContainer>
-
-        <Separator $orientation="horizontal" $color="muted" $thickness="1px" />
+        <YearRange point={activePoint} />
 
         <EventsSwiper
           onPointChange={handlePointChange}

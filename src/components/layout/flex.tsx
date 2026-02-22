@@ -46,6 +46,8 @@ interface StyledFlexProps {
 
   $backgroundColor?: keyof DefaultTheme['colors'];
   $borderRadius?: string;
+
+  $fluid?: boolean;
 }
 
 interface FlexProps extends StyledFlexProps {
@@ -106,6 +108,8 @@ const StyledFlex = styled.div<StyledFlexProps>`
   ${({ $backgroundColor, theme }) =>
     $backgroundColor && `background-color: ${theme.colors[$backgroundColor]};`}
   ${({ $borderRadius }) => $borderRadius && `border-radius: ${$borderRadius};`}
+
+  ${({ $fluid }) => $fluid && `flex: 1;`}
 `;
 
 export const Flex = ({ children, as = 'div', ...props }: FlexProps) => {

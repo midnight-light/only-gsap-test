@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
 const LayoutContainer = styled.div`
+  height: 100%;
+
   /* 10rem на laptop до 20rem на desktop */
   padding-left: clamp(10rem, calc(-20rem + 2.083vw), 20rem);
 
@@ -12,11 +14,6 @@ const LayoutContainer = styled.div`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
     padding-top: ${({ theme }) => theme.spacing.sm};
     padding-left: ${({ theme }) => theme.spacing.sm};
     padding-right: ${({ theme }) => theme.spacing.sm};

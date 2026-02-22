@@ -50,6 +50,15 @@ const TopLeftContent = styled.div`
   justify-content: flex-start;
   pointer-events: none;
   z-index: 1;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
 `;
 
 export const HistoricalDateSection = () => {
@@ -87,11 +96,20 @@ export const HistoricalDateSection = () => {
         $height="100%"
         $fluid
       >
-        <Header as="h1" $variant="primary">
-          Исторические даты
-        </Header>
+        <TopLeftContent>
+          <Header as="h1" $variant="primary" $align="left">
+            Исторические даты
+          </Header>
+        </TopLeftContent>
 
         <YearRange point={activePoint} />
+
+        <Separator
+          $width="100%"
+          $color="muted"
+          $orientation="horizontal"
+          $thickness="1px"
+        />
 
         <EventsSwiper
           onPointChange={handlePointChange}

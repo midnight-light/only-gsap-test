@@ -18,6 +18,10 @@ const Wrapper = styled.div`
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     font-size: ${({ theme }) => theme.typography.heading.h1};
   }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallTablet}) {
+    gap: ${({ theme }) => theme.spacing.md};
+  }
 `;
 
 export const YearRange: React.FC<YearRangeProps> = ({ point }) => {

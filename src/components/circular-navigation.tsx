@@ -371,7 +371,6 @@ export const CircularNavigation: React.FC<CircularNavigationProps> = ({
   });
 
   useEffect(() => {
-    console.warn('activePointId', activePointId);
     const previousId = prevActivePointIdRef.current;
     prevActivePointIdRef.current = activePointId;
 

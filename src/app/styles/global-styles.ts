@@ -23,6 +23,10 @@ export const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
   }
 
+  #root {
+  min-height: 100%;
+  }
+
   button {
     font-family: inherit;
     cursor: pointer;

@@ -3,6 +3,10 @@
 ![alt text](docs/images/large-screen.png)
 ![alt text](docs/images/other-screens.png)
 
+## Live Demo
+
+https://only-gsap-test-frlihxwpp-vlims-projects.vercel.app/
+
 ## Быстрый старт
 
 ```
